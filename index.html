@@ -199,7 +199,7 @@
   <button class="btn-mom" id="btn-mom" onclick="generateMoM()" style="display:none"><i class="fa-solid fa-file-lines"></i> Generate MoM</button>
   <label class="btn-upload-audio" id="btn-upload-audio-label">
     <i class="fa-solid fa-file-audio"></i> Upload Audio
-    <input type="file" accept="audio/*,video/*,.mp3,.wav,.m4a,.ogg,.webm,.mp4,.aac,.flac,.wma" capture="false" onchange="uploadAudioTranscribe(event)" style="display:none"/>
+    <input type="file" accept=".mp3,.wav,.m4a,.ogg,.webm,.mp4,.aac,.flac,.wma,audio/*" onchange="handleMobileUpload(event)" style="display:none"/>
   </label>
   <button class="btn-export-transcript" onclick="exportTranscriptJSON()"><i class="fa-solid fa-file-code"></i> Export JSON</button>
   <button class="btn-export-transcript" onclick="exportTranscriptPDF()"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
@@ -489,7 +489,7 @@
       <p class="upload-desc">Record on your phone and upload here. Gemini AI will transcribe it instantly.</p>
       <label class="btn-upload-big">
         <i class="fa-solid fa-cloud-arrow-up"></i> Choose Audio File
-        <input type="file" accept="audio/*,video/*,.mp3,.wav,.m4a,.ogg,.webm,.mp4,.aac,.flac,.wma" capture="false" onchange="handleMobileUpload(event)" style="display:none"/>
+        <input type="file" accept=".mp3,.wav,.m4a,.ogg,.webm,.mp4,.aac,.flac,.wma,audio/*" onchange="uploadAudioTranscribe(event)" style="display:none"/>
       </label>
       <p class="upload-formats">Supports MP3, WAV, M4A, WebM, MP4, OGG</p>
       <div class="upload-progress hidden" id="upload-progress">
