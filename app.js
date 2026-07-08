@@ -218,6 +218,14 @@ function showPage(page) {
   if (page === 'calendar') renderCalendar();
   if (page === 'upload') initUploadPage();
   if (window.innerWidth <= 768) toggleSidebar();
+
+  // Sync bottom nav
+document.querySelectorAll('.bottom-nav-item').forEach(n => n.classList.remove('active'));
+const bottomPages = ['dashboard', 'record', 'meetings', 'upload', 'settings'];
+const bottomIdx = bottomPages.indexOf(page);
+const bottomItems = document.querySelectorAll('.bottom-nav-item');
+if (bottomIdx >= 0 && bottomItems[bottomIdx]) bottomItems[bottomIdx].classList.add('active');
+
 }
 
 function initUploadPage() {
