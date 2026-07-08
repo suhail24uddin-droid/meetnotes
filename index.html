@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MeetNotes by Suhail</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#6c63ff" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ONBOARDING -->
+  <div id="onboarding" class="onboarding hidden">
+    <div class="onboarding-box">
+      <div class="onboarding-steps">
+        <div class="onboarding-step active" id="ob-step-0">
+          <div class="ob-icon">🎉</div>
+          <h2>Welcome to MeetNotes by Suhail!</h2>
+          <p>Your AI-powered meeting assistant. Let's take a quick tour to get you started.</p>
+        </div>
+        <div class="onboarding-step" id="ob-step-1">
+          <div class="ob-icon">🎙️</div>
+          <h2>Record Meetings</h2>
+          <p>Click <strong>Record Meeting</strong> to start capturing your meeting in real-time.</p>
+        </div>
+        <div class="onboarding-step" id="ob-step-2">
+          <div class="ob-icon">🤖</div>
+          <h2>AI Summarization</h2>
+          <p>After recording, click <strong>Summarize with AI</strong> to get an instant summary, action items, sentiment and topics.</p>
+        </div>
+        <div class="onboarding-step" id="ob-step-3">
+          <div class="ob-icon">💬</div>
+          <h2>Chat with Transcript</h2>
+          <p>Open any saved meeting and ask the AI anything about it.</p>
+        </div>
+        <div class="onboarding-step" id="ob-step-4">
+          <div class="ob-icon">🔑</div>
+          <h2>Set Your Gemini API Key</h2>
+          <p>Go to <strong>Settings</strong> and paste your free Gemini API key. Get one free at <strong>aistudio.google.com</strong></p>
+        </div>
+      </div>
+      <div class="ob-dots" id="ob-dots">
+        <span class="ob-dot active"></span><span class="ob-dot"></span><span class="ob-dot"></span><span class="ob-dot"></span><span class="ob-dot"></span>
+      </div>
+      <div class="ob-buttons">
+        <button class="btn-ob-skip" onclick="finishOnboarding()">Skip</button>
+        <button class="btn-ob-next" id="ob-next-btn" onclick="obNext()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN SCREEN -->
+  <div id="pin-screen" class="pin-screen hidden">
+    <div class="pin-box">
+      <div class="pin-logo"><i class="fa-solid fa-note-sticky"></i> MeetNotes <span style="color:var(--accent2);font-size:0.85rem">by Suhail</span></div>
+      <p class="pin-label" id="pin-label">Enter PIN to unlock</p>
+      <div class="pin-dots" id="pin-dots"><span></span><span></span><span></span><span></span></div>
+      <div class="pin-pad">
+        <button onclick="pinPress('1')">1</button><button onclick="pinPress('2')">2</button><button onclick="pinPress('3')">3</button>
+        <button onclick="pinPress('4')">4</button><button onclick="pinPress('5')">5</button><button onclick="pinPress('6')">6</button>
+        <button onclick="pinPress('7')">7</button><button onclick="pinPress('8')">8</button><button onclick="pinPress('9')">9</button>
+        <button onclick="pinPress('clear')" class="pin-clear">✕</button><button onclick="pinPress('0')">0</button><button onclick="pinPress('del')" class="pin-clear">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div id="profile-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Switch Profile</h3>
+        <button onclick="closeModal('profile-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="profiles-list"></div>
+      <div class="modal-footer">
+        <input type="text" id="new-profile-name" placeholder="New profile name..." class="settings-input"/>
+        <button class="btn-primary" onclick="addProfile()"><i class="fa-solid fa-plus"></i> Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <i class="fa-solid fa-note-sticky"></i>
+      <span>MeetNotes <span style="color:var(--accent2);font-size:0.8rem">by Suhail</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" onclick="showPage('dashboard')"><i class="fa-solid fa-house"></i> Dashboard</a>
+      <a href="#" class="nav-item" onclick="showPage('record')"><i class="fa-solid fa-microphone"></i> Record Meeting</a>
+      <a href="#" class="nav-item" onclick="showPage('meetings')"><i class="fa-solid fa-clock-rotate-left"></i> Past Meetings</a>
+      <a href="#" class="nav-item" onclick="showPage('calendar')"><i class="fa-solid fa-calendar"></i> Calendar</a>
+      <a href="#" class="nav-item" onclick="showPage('analytics')"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+      <a href="#" class="nav-item" onclick="showPage('actions')"><i class="fa-solid fa-list-check"></i> Action Items</a>
+      <a href="#" class="nav-item" onclick="showPage('settings')"><i class="fa-solid fa-gear"></i> Settings</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn"><i class="fa-solid fa-moon"></i> Dark Mode</button>
+      <div class="sidebar-footer" onclick="openModal('profile-modal')" style="cursor:pointer">
+        <div class="profile-avatar" id="sidebar-avatar">S</div>
+        <div>
+          <p style="font-size:0.85rem;font-weight:600;color:var(--text)" id="sidebar-profile-name">Suhail</p>
+          <p style="font-size:0.75rem;color:var(--text-muted)">Switch profile</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HAMBURGER -->
+  <button class="hamburger" id="hamburger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main" id="main-content">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="topbar">
+        <h1 class="page-title">Dashboard</h1>
+        <button class="btn-primary" onclick="showPage('record')"><i class="fa-solid fa-microphone"></i> Quick Record</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon blue"><i class="fa-solid fa-calendar-days"></i></div><div><p class="stat-label">Total Meetings</p><h2 class="stat-value" id="stat-total">0</h2></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i class="fa-solid fa-list-check"></i></div><div><p class="stat-label">Action Items</p><h2 class="stat-value" id="stat-actions">0</h2></div></div>
+        <div class="stat-card"><div class="stat-icon orange"><i class="fa-solid fa-clock"></i></div><div><p class="stat-label">This Week</p><h2 class="stat-value" id="stat-week">0</h2></div></div>
+        <div class="stat-card"><div class="stat-icon purple"><i class="fa-solid fa-brain"></i></div><div><p class="stat-label">AI Summaries</p><h2 class="stat-value" id="stat-summaries">0</h2></div></div>
+      </div>
+      <div class="section">
+        <h2 class="section-title">Recent Meetings</h2>
+        <div id="recent-meetings-list"><div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>No meetings yet. Start recording!</p></div></div>
+      </div>
+    </div>
+
+    <!-- RECORD PAGE -->
+    <div id="page-record" class="page">
+      <div class="topbar">
+        <h1 class="page-title">Record Meeting</h1>
+        <div class="topbar-right">
+          <div class="lang-selector"><i class="fa-solid fa-globe"></i>
+            <select id="lang-select">
+              <option value="en-US">English</option>
+              <option value="de-DE">German</option>
+              <option value="fr-FR">French</option>
+              <option value="ar-SA">Arabic</option>
+              <option value="ur-PK">Urdu</option>
+              <option value="zh-CN">Chinese</option>
+              <option value="es-ES">Spanish</option>
+              <option value="it-IT">Italian</option>
+            </select>
+          </div>
+          <div class="api-key-wrapper">
+            <i class="fa-solid fa-key"></i>
+            <input type="text" id="api-key" placeholder="Paste API key here..." style="font-size:0.8rem"/>
+            <button onclick="saveApiKeyQuick()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.8rem;white-space:nowrap"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEETING MODE SELECTOR -->
+      <div class="meeting-mode-selector">
+        <div class="mode-card active" id="mode-online" onclick="setMeetingMode('online')">
+          <div class="mode-icon">💻</div>
+          <div class="mode-info">
+            <p class="mode-title">Online Meeting</p>
+            <p class="mode-desc">Teams, Zoom or any call on your PC</p>
+            <p class="mode-source"><i class="fa-solid fa-volume-high"></i> Uses Stereo Mix — captures all PC audio</p>
+          </div>
+          <div class="mode-check"><i class="fa-solid fa-circle-check"></i></div>
+        </div>
+        <div class="mode-card" id="mode-inperson" onclick="setMeetingMode('inperson')">
+          <div class="mode-icon">🤝</div>
+          <div class="mode-info">
+            <p class="mode-title">In-Person Meeting</p>
+            <p class="mode-desc">Physical room, face to face</p>
+            <p class="mode-source"><i class="fa-solid fa-microphone"></i> Uses Microphone — captures room audio</p>
+          </div>
+          <div class="mode-check"><i class="fa-solid fa-circle-check"></i></div>
+        </div>
+      </div>
+
+      <!-- AUDIO LEVEL -->
+      <div class="audio-level-bar hidden" id="audio-level-bar">
+        <span id="audio-level-label"><i class="fa-solid fa-wave-square"></i> Audio Level</span>
+        <div class="audio-level-track"><div class="audio-level-fill" id="audio-level-fill"></div></div>
+        <span class="audio-level-status" id="audio-level-status">Listening...</span>
+      </div>
+
+      <div id="agenda-reminder" class="agenda-reminder hidden">
+        <i class="fa-solid fa-list-ul"></i>
+        <span id="agenda-reminder-text"></span>
+      </div>
+<div class="summarize-bar" style="margin-bottom:16px">
+  <button class="btn-summarize" id="btn-summarize" onclick="summarizeWithGemini()"><i class="fa-solid fa-brain"></i> Summarize with AI</button>
+  <button class="btn-mom" id="btn-mom" onclick="generateMoM()" style="display:none"><i class="fa-solid fa-file-lines"></i> Generate MoM</button>
+  <label class="btn-upload-audio" id="btn-upload-audio-label">
+    <i class="fa-solid fa-file-audio"></i> Upload Audio
+    <input type="file" accept="audio/*" onchange="uploadAudioTranscribe(event)" style="display:none"/>
+  </label>
+  <button class="btn-export-transcript" onclick="exportTranscriptJSON()"><i class="fa-solid fa-file-code"></i> Export JSON</button>
+  <button class="btn-export-transcript" onclick="exportTranscriptPDF()"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+  <span class="summarize-hint">Powered by Gemini 2.5 Flash</span>
+</div>
+
+      <div class="record-grid" style="flex:1;min-height:0">
+        <div class="record-panel">
+          <div class="record-status"><div class="pulse-ring" id="pulse-ring"></div><i class="fa-solid fa-microphone" id="mic-icon"></i></div>
+          <p class="record-label" id="record-label">Ready to Record</p>
+          <div class="record-buttons">
+            <button class="btn-record" id="btn-start" onclick="startRecording()"><i class="fa-solid fa-microphone"></i> Start Recording</button>
+            <button class="btn-stop hidden" id="btn-stop" onclick="stopRecording()"><i class="fa-solid fa-stop"></i> Stop</button>
+            <button class="btn-pause hidden" id="btn-pause" onclick="togglePause()"><i class="fa-solid fa-pause"></i> Pause</button>
+            <button class="btn-voice-record" id="btn-voice-record" onclick="toggleVoiceRecording()"><i class="fa-solid fa-circle-dot"></i> Voice Record</button>
+          </div>
+          <div class="timer" id="timer">00:00</div>
+          <div class="attendees-box">
+            <label>👥 Attendees</label>
+            <input type="text" id="attendees-input" placeholder="John, Sarah, Ahmed..."/>
+          </div>
+        </div>
+        <div class="transcript-panel" style="height:100%;display:flex;flex-direction:column">
+          <div class="transcript-header">
+            <span><i class="fa-solid fa-align-left"></i> Live Transcript <span class="rec-status-dot" id="rec-status-dot"></span></span>
+            <div style="display:flex;gap:8px">
+              <button class="btn-paste-mode" id="btn-paste-mode" onclick="togglePasteMode()"><i class="fa-solid fa-paste"></i> Paste Transcript</button>
+              <button class="btn-clean" id="btn-clean" onclick="cleanTranscript()"><i class="fa-solid fa-wand-magic-sparkles"></i> Clean</button>
+              <button class="btn-clear" onclick="clearTranscript()"><i class="fa-solid fa-trash"></i> Clear</button>
+            </div>
+          </div>
+          <div class="transcript-box" id="transcript-box"><p class="transcript-placeholder">Transcript will appear here as you speak...</p></div>
+          <div id="paste-transcript-box" class="paste-transcript-box hidden">
+            <textarea id="paste-textarea" placeholder="Paste your transcript here from Teams, Zoom, Word or anywhere else..."></textarea>
+            <button class="btn-primary" onclick="usePastedTranscript()" style="margin-top:10px;width:100%"><i class="fa-solid fa-check"></i> Use This Transcript</button>
+          </div>
+        </div>
+      </div>
+
+      
+
+      <div class="summary-section hidden" id="summary-section">
+        <div class="summary-card">
+          <div class="summary-header">
+            <div>
+              <p class="summary-meta">AI Generated Summary</p>
+              <h2 class="summary-title" id="summary-title">—</h2>
+              <span class="summary-tag" id="summary-tag">—</span>
+              <span class="sentiment-badge" id="sentiment-badge"></span>
+            </div>
+            <div class="summary-actions">
+              <button class="btn-save" onclick="saveMeeting()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+              <button class="btn-pdf" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+            </div>
+          </div>
+          <div class="summary-body">
+            <div class="summary-block"><h4><i class="fa-solid fa-file-lines"></i> Summary</h4><p id="summary-text">—</p></div>
+            <div class="summary-block"><h4><i class="fa-solid fa-list-check"></i> Action Items</h4><ul id="action-items-list"></ul></div>
+          </div>
+          <div class="topics-row" id="topics-row"></div>
+          <div id="followup-section" class="followup-section hidden">
+            <h4><i class="fa-solid fa-circle-question"></i> Suggested Follow-up Questions</h4>
+            <ul id="followup-list"></ul>
+          </div>
+          <div id="agenda-check-section" class="agenda-check hidden">
+            <h4><i class="fa-solid fa-list-check"></i> Agenda Coverage Check</h4>
+            <div id="agenda-check-list"></div>
+          </div>
+          <div class="translate-bar">
+            <select id="translate-lang">
+              <option value="">Translate summary to...</option>
+              <option value="German">German</option>
+              <option value="Arabic">Arabic</option>
+              <option value="Urdu">Urdu</option>
+              <option value="French">French</option>
+              <option value="Spanish">Spanish</option>
+              <option value="Chinese">Chinese</option>
+            </select>
+            <button class="btn-translate" onclick="translateSummary()"><i class="fa-solid fa-language"></i> Translate</button>
+          </div>
+          <div id="translated-summary" class="translated-box hidden"></div>
+        </div>
+      </div>
+
+      <div class="mom-section hidden" id="mom-section">
+        <div class="summary-card">
+          <div class="summary-header">
+            <div><p class="summary-meta">Minutes of Meeting</p><h2 class="summary-title" id="mom-title">—</h2></div>
+            <div class="summary-actions">
+              <button class="btn-pdf" onclick="exportMoMPDF()"><i class="fa-solid fa-file-pdf"></i> Export MoM</button>
+              <button class="btn-email" onclick="emailMoM()"><i class="fa-solid fa-envelope"></i> Email MoM</button>
+            </div>
+          </div>
+          <div id="mom-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAST MEETINGS -->
+    <div id="page-meetings" class="page">
+      <div class="topbar">
+        <h1 class="page-title">Past Meetings</h1>
+        <div class="topbar-right">
+          <input type="text" class="search-input" id="meetings-search" placeholder="🔍 Search meetings..." oninput="searchMeetings(this.value)"/>
+          <select class="search-input" onchange="filterByTag(this.value)" id="tag-filter" style="width:160px"><option value="">All Tags</option></select>
+          <select class="search-input" onchange="filterBySentiment(this.value)" style="width:160px">
+            <option value="">All Sentiments</option>
+            <option>Positive</option><option>Neutral</option><option>Negative</option><option>Tense</option>
+          </select>
+          <button class="btn-export-all" onclick="exportAllData()"><i class="fa-solid fa-download"></i> Backup</button>
+          <label class="btn-export-all" style="cursor:pointer"><i class="fa-solid fa-upload"></i> Restore <input type="file" accept=".json" onchange="importData(event)" style="display:none"/></label>
+        </div>
+      </div>
+      <div id="meetings-list"><div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>No saved meetings yet.</p></div></div>
+    </div>
+
+    <!-- MEETING DETAIL -->
+    <div id="page-detail" class="page">
+      <div class="topbar">
+        <button class="btn-back" onclick="showPage('meetings')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <h1 class="page-title" id="detail-title">Meeting Detail</h1>
+        <div class="topbar-right">
+          <button class="btn-pdf" onclick="exportDetailPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+          <button class="btn-pin" id="btn-pin" onclick="togglePin()"><i class="fa-solid fa-thumbtack"></i> Pin</button>
+          <button class="btn-fav" id="btn-fav" onclick="toggleFavorite()"><i class="fa-solid fa-star"></i> Favorite</button>
+          <button class="btn-delete" onclick="deleteMeeting()"><i class="fa-solid fa-trash"></i> Delete</button>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-left">
+          <div class="detail-meta-card">
+            <div class="detail-meta-row"><i class="fa-solid fa-calendar"></i><span id="detail-date">—</span></div>
+            <div class="detail-meta-row"><i class="fa-solid fa-tag"></i><span id="detail-tag">—</span></div>
+            <div class="detail-meta-row"><i class="fa-solid fa-clock"></i><span id="detail-duration">—</span></div>
+            <div class="detail-meta-row"><i class="fa-solid fa-users"></i><span id="detail-attendees">—</span></div>
+            <div class="detail-meta-row"><i class="fa-solid fa-face-smile"></i><span id="detail-sentiment">—</span></div>
+          </div>
+          <div class="section" style="margin-bottom:16px">
+            <h4 class="section-title"><i class="fa-solid fa-file-lines"></i> Summary</h4>
+            <p id="detail-summary" style="font-size:0.9rem;line-height:1.7"></p>
+          </div>
+          <div class="section" style="margin-bottom:16px">
+            <h4 class="section-title"><i class="fa-solid fa-list-check"></i> Action Items</h4>
+            <div id="detail-actions-list"></div>
+          </div>
+          <div class="section" style="margin-bottom:16px">
+            <h4 class="section-title"><i class="fa-solid fa-cloud-word"></i> Word Cloud</h4>
+            <div id="word-cloud" class="word-cloud"></div>
+          </div>
+          <div class="section">
+            <h4 class="section-title"><i class="fa-solid fa-align-left"></i> Full Transcript</h4>
+            <p id="detail-transcript" style="font-size:0.85rem;line-height:1.8;color:var(--text-muted)"></p>
+          </div>
+        </div>
+        <div class="detail-right">
+          <div class="chat-panel">
+            <div class="chat-header"><i class="fa-solid fa-comments"></i> Chat with this Meeting</div>
+            <div class="chat-messages" id="chat-messages"><div class="chat-bubble ai">👋 Hi! Ask me anything about this meeting transcript.</div></div>
+            <div class="chat-suggestions" id="chat-suggestions">
+              <button onclick="askSuggestion(this)">What were the main decisions?</button>
+              <button onclick="askSuggestion(this)">Who has action items?</button>
+              <button onclick="askSuggestion(this)">What problems were discussed?</button>
+            </div>
+            <div class="chat-input-row">
+              <input type="text" id="chat-input" placeholder="Ask about this meeting..." onkeydown="if(event.key==='Enter') sendChat()"/>
+              <button class="btn-send" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div id="page-calendar" class="page">
+      <div class="topbar">
+        <h1 class="page-title">Calendar View</h1>
+        <div class="topbar-right">
+          <button class="btn-back" onclick="prevMonth()"><i class="fa-solid fa-chevron-left"></i></button>
+          <span id="calendar-month" style="font-weight:600;font-size:1rem"></span>
+          <button class="btn-back" onclick="nextMonth()"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="section" style="margin-top:20px">
+        <h2 class="section-title">Meetings this month</h2>
+        <div id="calendar-meetings-list"></div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div id="page-analytics" class="page">
+      <div class="topbar">
+        <h1 class="page-title">Analytics</h1>
+        <button class="btn-primary" onclick="generateTrendsReport()"><i class="fa-solid fa-file-chart-line"></i> Monthly Report</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon blue"><i class="fa-solid fa-calendar-days"></i></div><div><p class="stat-label">Total Meetings</p><h2 class="stat-value" id="an-total">0</h2></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i class="fa-solid fa-list-check"></i></div><div><p class="stat-label">Total Action Items</p><h2 class="stat-value" id="an-actions">0</h2></div></div>
+        <div class="stat-card"><div class="stat-icon orange"><i class="fa-solid fa-clock"></i></div><div><p class="stat-label">Avg Duration</p><h2 class="stat-value" id="an-duration">0m</h2></div></div>
+        <div class="stat-card"><div class="stat-icon purple"><i class="fa-solid fa-fire"></i></div><div><p class="stat-label">Most Used Tag</p><h2 class="stat-value" id="an-tag" style="font-size:1rem">—</h2></div></div>
+      </div>
+      <div class="analytics-grid">
+        <div class="section"><h2 class="section-title">Meetings Per Day (Last 7 Days)</h2><div class="bar-chart" id="bar-chart"></div></div>
+        <div class="section"><h2 class="section-title">Meetings by Tag</h2><div id="tag-chart"></div></div>
+      </div>
+      <div class="section" style="margin-top:20px"><h2 class="section-title">Sentiment Overview</h2><div id="sentiment-chart"></div></div>
+      <div class="section" style="margin-top:20px" id="trends-report-section">
+        <h2 class="section-title"><i class="fa-solid fa-file-chart-line"></i> Monthly Trends Report</h2>
+        <div id="trends-report-content"><div class="empty-state"><i class="fa-solid fa-chart-line"></i><p>Click "Monthly Report" to generate an AI analysis of your meeting patterns.</p></div></div>
+      </div>
+    </div>
+
+    <!-- ACTION ITEMS -->
+    <div id="page-actions" class="page">
+      <div class="topbar">
+        <h1 class="page-title">All Action Items</h1>
+        <span id="actions-progress" style="font-size:0.85rem;color:var(--text-muted)"></span>
+      </div>
+      <div id="all-actions-list"><div class="empty-state"><i class="fa-solid fa-list-check"></i><p>No action items yet.</p></div></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="page-settings" class="page">
+      <div class="topbar"><h1 class="page-title">Settings</h1></div>
+      <div class="settings-card">
+        <h3 class="settings-title"><i class="fa-solid fa-key"></i> Gemini API Key</h3>
+        <p class="settings-desc">Your API key is saved locally and never shared.</p>
+        <div class="settings-row"><input type="password" id="settings-api-key" placeholder="Paste your Gemini API key..." class="settings-input"/><button class="btn-primary" onclick="saveApiKey()"><i class="fa-solid fa-floppy-disk"></i> Save Key</button></div>
+      </div>
+      <div class="settings-card">
+        <h3 class="settings-title"><i class="fa-solid fa-globe"></i> Default Language</h3>
+        <p class="settings-desc">Default transcription language.</p>
+        <div class="settings-row">
+          <select id="settings-lang" class="settings-input">
+            <option value="en-US">English</option><option value="de-DE">German</option><option value="fr-FR">French</option>
+            <option value="ar-SA">Arabic</option><option value="ur-PK">Urdu</option><option value="zh-CN">Chinese</option>
+            <option value="es-ES">Spanish</option><option value="it-IT">Italian</option>
+          </select>
+          <button class="btn-primary" onclick="saveLang()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        </div>
+      </div>
+      <div class="settings-card">
+        <h3 class="settings-title"><i class="fa-solid fa-tags"></i> Custom Tags</h3>
+        <p class="settings-desc">Add your own meeting tags.</p>
+        <div id="custom-tags-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+        <div class="settings-row">
+          <input type="text" id="new-tag-input" placeholder="New tag name..." class="settings-input"/>
+          <button class="btn-primary" onclick="addCustomTag()"><i class="fa-solid fa-plus"></i> Add Tag</button>
+        </div>
+      </div>
+      <div class="settings-card">
+        <h3 class="settings-title"><i class="fa-solid fa-lock"></i> PIN Lock</h3>
+        <p class="settings-desc">Protect your meetings with a 4-digit PIN.</p>
+        <div class="settings-row">
+          <input type="password" id="pin-input" placeholder="Set 4-digit PIN..." class="settings-input" maxlength="4"/>
+          <button class="btn-primary" onclick="savePIN()"><i class="fa-solid fa-lock"></i> Set PIN</button>
+          <button class="btn-clear" onclick="removePIN()"><i class="fa-solid fa-lock-open"></i> Remove</button>
+        </div>
+      </div>
+      <div class="settings-card">
+        <h3 class="settings-title"><i class="fa-solid fa-bell"></i> Notifications</h3>
+        <p class="settings-desc">Enable browser notifications for action item reminders.</p>
+        <button class="btn-primary" onclick="enableNotifications()"><i class="fa-solid fa-bell"></i> Enable Notifications</button>
+      </div>
+      <div class="settings-card">
+        <h3 class="settings-title"><i class="fa-solid fa-rotate-left"></i> Onboarding</h3>
+        <p class="settings-desc">View the welcome tour again.</p>
+        <button class="btn-primary" onclick="startOnboarding()"><i class="fa-solid fa-play"></i> Show Tour</button>
+      </div>
+      <div class="settings-card danger-card">
+        <h3 class="settings-title"><i class="fa-solid fa-trash"></i> Danger Zone</h3>
+        <p class="settings-desc">Permanently delete all saved meetings.</p>
+        <button class="btn-delete" onclick="clearAllData()"><i class="fa-solid fa-trash"></i> Delete All Data</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
