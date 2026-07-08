@@ -96,6 +96,7 @@
       <a href="#" class="nav-item" onclick="showPage('calendar')"><i class="fa-solid fa-calendar"></i> Calendar</a>
       <a href="#" class="nav-item" onclick="showPage('analytics')"><i class="fa-solid fa-chart-line"></i> Analytics</a>
       <a href="#" class="nav-item" onclick="showPage('actions')"><i class="fa-solid fa-list-check"></i> Action Items</a>
+      <a href="#" class="nav-item" onclick="showPage('upload')"><i class="fa-solid fa-mobile-screen"></i> Mobile Upload</a>
       <a href="#" class="nav-item" onclick="showPage('settings')"><i class="fa-solid fa-gear"></i> Settings</a>
     </nav>
     <div class="sidebar-bottom">
@@ -474,6 +475,69 @@
         <button class="btn-delete" onclick="clearAllData()"><i class="fa-solid fa-trash"></i> Delete All Data</button>
       </div>
     </div>
+<!-- MOBILE UPLOAD PAGE -->
+<div id="page-upload" class="page">
+  <div class="topbar">
+    <h1 class="page-title">📱 Mobile Upload</h1>
+  </div>
+  <div class="upload-grid">
+
+    <!-- UPLOAD CARD -->
+    <div class="upload-card">
+      <div class="upload-icon">🎵</div>
+      <h2 class="upload-title">Upload Voice Recording</h2>
+      <p class="upload-desc">Record on your phone and upload here. Gemini AI will transcribe it instantly.</p>
+      <label class="btn-upload-big">
+        <i class="fa-solid fa-cloud-arrow-up"></i> Choose Audio File
+        <input type="file" accept="audio/*,video/*" onchange="handleMobileUpload(event)" style="display:none"/>
+      </label>
+      <p class="upload-formats">Supports MP3, WAV, M4A, WebM, MP4, OGG</p>
+      <div class="upload-progress hidden" id="upload-progress">
+        <div class="upload-progress-bar" id="upload-progress-bar"></div>
+      </div>
+      <div class="upload-status hidden" id="upload-status"></div>
+    </div>
+
+    <!-- TRANSCRIPT RESULT -->
+    <div class="upload-result hidden" id="upload-result">
+      <div class="upload-result-header">
+        <h3><i class="fa-solid fa-align-left"></i> Transcribed Text</h3>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" onclick="useUploadedTranscript()"><i class="fa-solid fa-arrow-right"></i> Use for AI Summary</button>
+          <button class="btn-export-transcript" onclick="copyUploadedTranscript()"><i class="fa-solid fa-copy"></i> Copy</button>
+        </div>
+      </div>
+      <div class="upload-transcript-box" id="upload-transcript-box"></div>
+      <div class="upload-actions">
+        <input type="text" id="upload-attendees" placeholder="👥 Add attendees..." class="settings-input"/>
+        <button class="btn-summarize" onclick="summarizeUploadedTranscript()"><i class="fa-solid fa-brain"></i> Summarize & Save</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- QR CODE SECTION -->
+  <div class="qr-section">
+    <div class="qr-card">
+      <h3><i class="fa-solid fa-qrcode"></i> Quick Access from Phone</h3>
+      <p>Scan this QR code on your phone to open the upload page directly!</p>
+      <div id="qr-code" class="qr-placeholder">
+        <i class="fa-solid fa-qrcode" style="font-size:4rem;color:var(--accent)"></i>
+        <p style="margin-top:8px;font-size:0.85rem;color:var(--text-muted)">QR code appears here</p>
+        <button class="btn-primary" style="margin-top:12px" onclick="generateQR()"><i class="fa-solid fa-qrcode"></i> Generate QR Code</button>
+      </div>
+    </div>
+    <div class="qr-card">
+      <h3><i class="fa-solid fa-link"></i> Share Link</h3>
+      <p>Copy and share this link to open the upload page on any device.</p>
+      <div class="share-link-box">
+        <input type="text" id="share-link" class="settings-input" readonly/>
+        <button class="btn-primary" onclick="copyShareLink()"><i class="fa-solid fa-copy"></i> Copy</button>
+      </div>
+      <p class="upload-formats" style="margin-top:8px">Share via WhatsApp, Email or Teams!</p>
+    </div>
+  </div>
+</div>
 
   </div>
 
