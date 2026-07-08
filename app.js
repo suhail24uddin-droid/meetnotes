@@ -216,9 +216,14 @@ function showPage(page) {
   if (page === 'analytics') renderAnalytics();
   if (page === 'actions') renderAllActions();
   if (page === 'calendar') renderCalendar();
+  if (page === 'upload') initUploadPage();
   if (window.innerWidth <= 768) toggleSidebar();
 }
 
+function initUploadPage() {
+  const shareLink = document.getElementById('share-link');
+  if (shareLink) shareLink.value = window.location.href.split('?')[0];
+}
 
 // ─── DASHBOARD ────────────────────────────────────────────
 function updateDashboard() {
@@ -1232,4 +1237,120 @@ async function uploadAudioTranscribe(event) {
     console.error(err);
     if (btn) btn.textContent = '🎵 Upload Audio';
   }
+}
+// ─── MOBILE UPLOAD ────────────────────────────────────────
+let uploadedTranscript = '';
+
+async function handleMobileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const apiKey = localStorage.getItem('gemini-api-key') || document.getElementById('api-key').value.trim();
+  if (!apiKey) { alert('Please set your Gemini API key in Settings first!'); return; }
+
+  const status = document.getElementById('upload-status');
+  const progress = document.getElementById('upload-progress');
+  const progressBar = document.getElementById('upload-progress-bar');
+  const result = document.getElementById('upload-result');
+
+  status.classList.remove('hidden');
+  status.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Reading file: <strong>${file.name}</strong>`;
+  progress.classList.remove('hidden');
+  result.classList.add('hidden');
+
+  // Animate progress bar
+  let pct = 0;
+  const progressInterval = setInterval(() => {
+    pct = Math.min(pct + 5, 90);
+    progressBar.style.width = pct + '%';
+  }, 200);
+
+  try {
+    // Convert to base64
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    status.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Transcribing with Gemini AI...`;
+
+    const mimeType = file.type || 'audio/mp4';
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: 'Transcribe this audio recording accurately and completely. Return only the transcript text with proper punctuation and paragraphs. Do not add any commentary.' },
+              { inline_data: { mime_type: mimeType, data: base64 } }
+            ]
+          }]
+        })
+      }
+    );
+
+    const data = await response.json();
+    uploadedTranscript = data.candidates[0].content.parts[0].text;
+
+    clearInterval(progressInterval);
+    progressBar.style.width = '100%';
+    progressBar.style.background = 'var(--green)';
+
+    status.innerHTML = `✅ <strong>Transcription complete!</strong> ${uploadedTranscript.split(' ').length} words`;
+    document.getElementById('upload-transcript-box').textContent = uploadedTranscript;
+    result.classList.remove('hidden');
+
+    showToast('✅ Audio transcribed successfully!');
+
+  } catch (err) {
+    clearInterval(progressInterval);
+    status.innerHTML = `❌ Error transcribing. Check your API key!`;
+    status.style.color = 'var(--red)';
+    console.error(err);
+  }
+}
+
+function useUploadedTranscript() {
+  if (!uploadedTranscript) return;
+  transcript = uploadedTranscript;
+  speakerTranscript = uploadedTranscript;
+  const box = document.getElementById('transcript-box');
+  if (box) box.innerHTML = `<span>${uploadedTranscript}</span>`;
+  showPage('record');
+  showToast('✅ Transcript loaded! Click Summarize with AI');
+}
+
+async function summarizeUploadedTranscript() {
+  if (!uploadedTranscript) { alert('No transcript yet!'); return; }
+  transcript = uploadedTranscript;
+  speakerTranscript = uploadedTranscript;
+  const attendees = document.getElementById('upload-attendees').value;
+  if (attendees) document.getElementById('attendees-input').value = attendees;
+  showPage('record');
+  await summarizeWithGemini();
+}
+
+function copyUploadedTranscript() {
+  navigator.clipboard.writeText(uploadedTranscript).then(() => showToast('✅ Transcript copied!'));
+}
+
+function generateQR() {
+  const url = window.location.href.split('?')[0];
+  const qrDiv = document.getElementById('qr-code');
+  qrDiv.innerHTML = `
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}" 
+         alt="QR Code" style="border-radius:10px;width:180px;height:180px"/>
+    <p style="margin-top:8px;font-size:0.8rem;color:var(--text-muted)">Scan to open on phone</p>`;
+  document.getElementById('share-link').value = url;
+  showToast('✅ QR Code generated!');
+}
+
+function copyShareLink() {
+  const link = document.getElementById('share-link').value;
+  if (!link) { generateQR(); return; }
+  navigator.clipboard.writeText(link).then(() => showToast('✅ Link copied!'));
 }
